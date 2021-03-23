@@ -3,3 +3,15 @@
 @import 'blacklight/blacklight';
 @import 'blacklight_marc';
 
+.navbar-logo {
+  flex: 0 0 450px;
+  height: 100px;  
+}
+
+.nahc-light { background-color: #A15801; }
+
+.site_footer {
+  background-color: black; 
+  color: white;
+  text-align: center;
+}
