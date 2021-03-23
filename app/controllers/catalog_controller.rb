@@ -9,10 +9,11 @@ class CatalogController < ApplicationController
 
 
   configure_blacklight do |config|
-    config.view.gallery.document_component = Blacklight::Gallery::DocumentComponent
+    # disable some of the views
+    # config.view.gallery.document_component = Blacklight::Gallery::DocumentComponent
     # config.view.gallery.classes = 'row-cols-2 row-cols-md-3'
-    config.view.masonry.document_component = Blacklight::Gallery::DocumentComponent
-    config.view.slideshow.document_component = Blacklight::Gallery::SlideshowComponent
+    # config.view.masonry.document_component = Blacklight::Gallery::DocumentComponent
+    # config.view.slideshow.document_component = Blacklight::Gallery::SlideshowComponent
     config.show.tile_source_field = :content_metadata_image_iiif_info_ssm
     config.show.partials.insert(1, :openseadragon)
     # default advanced config values
@@ -58,9 +59,9 @@ class CatalogController < ApplicationController
     config.add_results_collection_tool(:view_type_group)
 
     config.add_show_tools_partial(:bookmark, partial: 'bookmark_control', if: :render_bookmarks_control?)
-    config.add_show_tools_partial(:email, callback: :email_action, validator: :validate_email_params)
-    config.add_show_tools_partial(:sms, if: :render_sms_action?, callback: :sms_action, validator: :validate_sms_params)
-    config.add_show_tools_partial(:citation)
+    # config.add_show_tools_partial(:email, callback: :email_action, validator: :validate_email_params)
+    # config.add_show_tools_partial(:sms, if: :render_sms_action?, callback: :sms_action, validator: :validate_sms_params)
+    # config.add_show_tools_partial(:citation)
 
     config.add_nav_action(:bookmark, partial: 'blacklight/nav/bookmark', if: :render_bookmarks_control?)
     config.add_nav_action(:search_history, partial: 'blacklight/nav/search_history')
@@ -238,7 +239,7 @@ class CatalogController < ApplicationController
     config.add_index_field 'objmusno_s', label: 'Object Number'
     config.add_index_field 'objtype_s', label: 'Type'
     config.add_index_field 'objassoccult_ss', label: 'Culture'
-    config.add_index_field 'objfcp_s', label: 'Collection Place'
+    config.add_index_field 'objfcp_s', label: 'Location'
     config.add_index_field 'status_ss', label: 'Status'
 
     # search
@@ -246,7 +247,7 @@ class CatalogController < ApplicationController
       ['objmusno_s', 'Object number'],
       ['objname_txt', 'Object name'],
       ['objdescr_txt', 'Description'],
-      ['objfcp_txt', 'Collection place'],
+      ['objfcp_txt', 'Location'],
       ['objassoccult_txt', 'Culture or time period']
       ].each do |search_field|
       config.add_search_field(search_field[0]) do |field|
@@ -276,10 +277,10 @@ class CatalogController < ApplicationController
     config.add_show_field 'entered_date_dt', label: 'Entered Date'
     config.add_show_field 'portal_posting_date_dt', label: 'Portal Posting Date'
     config.add_show_field 'objmusno_s', label: 'Object Number'
-    config.add_show_field 'objdept_s', label: 'Department'
+    # config.add_show_field 'objdept_s', label: 'Department'
     config.add_show_field 'objtype_s', label: 'Type'
     config.add_show_field 'objassoccult_ss', label: 'Culture'
-    config.add_show_field 'objfcp_s', label: 'Collection Place'
+    config.add_show_field 'objfcp_s', label: 'Location'
     config.add_show_field 'status_ss', label: 'Status'
 
     # facets
@@ -290,31 +291,13 @@ class CatalogController < ApplicationController
     config.add_facet_field 'received_date_dt', label: 'Received Date', limit: true, index_range: true
     config.add_facet_field 'entered_date_dt', label: 'Entered Date', limit: true, index_range: true
     config.add_facet_field 'portal_posting_date_dt', label: 'Portal Posting Date', limit: true, index_range: true
-    config.add_facet_field 'objdept_s', label: 'Department', limit: true, index_range: true
+    # config.add_facet_field 'objdept_s', label: 'Department', limit: true, index_range: true
     config.add_facet_field 'objtype_s', label: 'Type', limit: true, index_range: true
     config.add_facet_field 'objassoccult_ss', label: 'Culture', limit: true, index_range: true
-    config.add_facet_field 'objfcp_s', label: 'Collection Place', limit: true, index_range: true
+    config.add_facet_field 'objfcp_s', label: 'Location', limit: true, index_range: true
     config.add_facet_field 'reported_s', label: 'Reported'
     config.add_facet_field 'status_ss', label: 'Status'
 
     # gallery
   end
-
-  def decode_ark
-    # decode ARK ID, e.g. hm21114461@2E1 -> 11-4461.1, hm210k3711a@2Df -> K-3711a-f
-    museum_number = CGI.unescape(params[:ark].gsub('@','%')).sub('hm2','')
-    museum_number = if museum_number[0] == 'x'
-        museum_number[1..-1]
-    else
-        left, right = museum_number[1..2], museum_number[3..-1]
-        left = left.gsub(/^0+/, '')
-        right = right.gsub(/^0+/, '')
-        left + '-' + right
-    end
-
-    redirect_to  :controller => 'catalog', action: 'index', search_field: 'objmusno_s_lower', q: '"' + museum_number + '"'
-    #redirect_to  :controller => 'catalog', action: 'show', id: csid
-
-  end
-
 end
